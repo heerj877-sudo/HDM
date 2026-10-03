@@ -1,0 +1,154 @@
+I can’t attach a downloadable ZIP from this chat, but you can run this **single-file prototype** on localhost. Save the code below as `index.html`, then run `python -m http.server 8000` in that folder and open `http://localhost:8000`.
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MediCare Clinic</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;color:#edf5ff;background:radial-gradient(ellipse at 80% 0%,#184b64 0,transparent 35%),linear-gradient(135deg,#091525,#111a35 55%,#102a37);min-height:100vh}
+  button,input,select{font:inherit}
+  button{cursor:pointer;color:inherit}
+  .app{min-height:100vh;display:grid;grid-template-columns:235px 1fr;gap:22px;padding:20px;max-width:1600px;margin:auto}
+  .glass{background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.13);backdrop-filter:blur(18px);box-shadow:0 18px 50px #02091455;border-radius:20px}
+  aside{padding:24px 16px;display:flex;flex-direction:column;min-height:calc(100vh - 40px)}
+  .brand{display:flex;align-items:center;gap:12px;padding:0 8px 30px}
+  .logo{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,#43d9d0,#5885ff);font-size:22px}
+  .brand strong{display:block;font-size:17px}.brand small,.muted{color:#9aacc4}
+  nav{display:grid;gap:8px}
+  nav button,.bottom button{border:0;background:transparent;text-align:left;padding:13px;border-radius:12px;color:#b9c9dc}
+  nav button:hover,.bottom button:hover,nav button.active{background:linear-gradient(100deg,#37d2c533,#637fff33);color:white}
+  .bottom{margin-top:auto;display:grid;gap:7px}.user{border-top:1px solid #ffffff20;padding:18px 5px 0;display:flex;align-items:center;gap:10px}
+  .avatar{width:37px;height:37px;display:grid;place-items:center;border-radius:50%;background:linear-gradient(135deg,#8b79ff,#42cfc3);font-weight:700}
+  main{min-width:0}.top{display:flex;justify-content:space-between;align-items:center;margin:5px 2px 24px}
+  h1{font-size:26px;margin:0 0 5px}.top p,.sub{margin:0;color:#9aacc4;font-size:14px}
+  .topright{display:flex;align-items:center;gap:14px}.search{width:190px}
+  input,select{border:1px solid #ffffff20;background:#111e32;color:#edf5ff;border-radius:11px;padding:11px 13px;outline:none}
+  input:focus,select:focus{border-color:#48d5cd}
+  .btn{border:0;border-radius:11px;padding:11px 16px;background:linear-gradient(110deg,#35cfc4,#5579ff);font-weight:700;box-shadow:0 8px 22px #39beba30}
+  .btn:hover{transform:translateY(-2px);filter:brightness(1.08)}
+  .hero{padding:26px 28px;margin-bottom:18px;background:linear-gradient(110deg,#1e879177,#635ce455),rgba(255,255,255,.07);display:flex;justify-content:space-between;align-items:center;gap:16px}
+  .hero h2{font-size:25px;margin:0 0 8px}.hero p{margin:0;color:#d1dfed}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:18px}
+  .stat{padding:20px}.stathead{display:flex;justify-content:space-between;color:#b9c9dc}.icon{font-size:22px}.number{font-size:32px;font-weight:750;margin:18px 0 4px}.growth{font-size:13px;color:#68e0b0}
+  .content{display:grid;grid-template-columns:1.65fr 1fr;gap:16px}
+  .panel{padding:20px;min-width:0}.panelhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+  h3{margin:0;font-size:17px}.link{border:0;background:none;color:#62d9d0}
+  .row{display:grid;grid-template-columns:1.3fr 1.2fr .8fr .8fr;gap:10px;align-items:center;padding:13px 0;border-top:1px solid #ffffff12;font-size:13px}
+  .person{display:flex;align-items:center;gap:9px}.mini{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#ffffff1c}
+  .status{border-radius:20px;padding:5px 9px;font-size:11px;background:#40d6a21c;color:#72e4ba;width:max-content}
+  .status.Pending{background:#ffc85a22;color:#ffd27b}.status.Cancelled{background:#ff677322;color:#ff9b9b}.status.Completed{background:#739bff25;color:#9ab6ff}
+  .actions{display:grid;gap:10px}.action{padding:16px;border:1px solid #ffffff15;background:#ffffff08;border-radius:14px;text-align:left}
+  .action:hover{background:#ffffff15;transform:translateY(-2px)}
+  .page{display:none}.page.active{display:block;animation:fade .3s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .toolbar{display:flex;gap:10px;justify-content:space-between;align-items:center;margin:18px 0}
+  .table{overflow:auto}.table .row{min-width:620px;grid-template-columns:1.2fr 1.1fr 1fr .8fr .8fr}
+  .empty{text-align:center;padding:25px;color:#9aacc4}
+  dialog{border:1px solid #ffffff25;border-radius:18px;background:#13243a;color:#edf5ff;width:min(480px,calc(100% - 28px));padding:24px;box-shadow:0 25px 90px #0009}
+  dialog::backdrop{background:#020815bb;backdrop-filter:blur(5px)}
+  .form{display:grid;gap:12px;margin:18px 0}.form input,.form select{width:100%}.modal-actions{display:flex;justify-content:flex-end;gap:10px}
+  .secondary{border:1px solid #ffffff25;background:#ffffff0b;border-radius:10px;padding:10px 14px}
+  #toast{position:fixed;right:22px;bottom:22px;background:#123b38;border:1px solid #5cddba66;padding:14px 18px;border-radius:12px;opacity:0;transform:translateY(10px);transition:.25s;pointer-events:none}
+  #toast.show{opacity:1;transform:none}
+  @media(max-width:900px){.app{grid-template-columns:75px 1fr;padding:12px;gap:12px}aside{padding:18px 8px}.brand{padding:0 8px 25px}.brand div:last-child,nav .label,.bottom .label,.user .who{display:none}nav button,.bottom button{text-align:center}.content{grid-template-columns:1fr}.search{width:140px}}
+  @media(max-width:600px){.app{display:block}.app aside{min-height:auto;margin-bottom:14px;padding:10px;display:block}.brand{padding:0 5px 10px}.brand div:last-child{display:block}nav{display:flex;overflow:auto}nav button{white-space:nowrap;padding:10px}.bottom,.user{display:none}.top{align-items:flex-start}.topright .search,.adminname{display:none}.stats{grid-template-columns:1fr}.hero{align-items:flex-start;flex-direction:column}.row{grid-template-columns:1.2fr 1fr .8fr}.row .date{display:none}.toolbar{align-items:stretch;flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="glass">
+    <div class="brand"><div class="logo">✚</div><div><strong>MediCare</strong><small>Clinic Management</small></div></div>
+    <nav>
+      <button class="active" data-page="Dashboard">🏠 <span class="label">Dashboard</span></button>
+      <button data-page="Doctors">👨‍⚕️ <span class="label">Doctors</span></button>
+      <button data-page="Patients">👥 <span class="label">Patients</span></button>
+      <button data-page="Appointments">📅 <span class="label">Appointments</span></button>
+    </nav>
+    <div class="bottom"><button>⚙️ <span class="label">Settings</span></button><button>↪ <span class="label">Log out</span></button>
+      <div class="user"><div class="avatar">A</div><div class="who"><strong>Admin</strong><br><small class="muted">Administrator</small></div></div>
+    </div>
+  </aside>
+  <main>
+    <header class="top"><div><h1 id="greeting">Good morning, Admin 👋</h1><p>Here's what's happening at your clinic today.</p></div>
+      <div class="topright"><input id="search" class="search" placeholder="⌕  Search appointments"><span>🔔</span><div class="avatar">A</div><strong class="adminname">Admin⌄</strong></div>
+    </header>
+
+    <section class="page active" id="Dashboard">
+      <div class="hero glass"><div><h2>Welcome back, Admin 👋</h2><p>Manage your clinic efficiently and keep track of today's appointments.</p></div><button class="btn" onclick="openBooking()">＋ Book Appointment</button></div>
+      <div class="stats">
+        <div class="stat glass"><div class="stathead"><span>Total Doctors</span><span class="icon">🩺</span></div><div class="number">24</div><div class="growth">↗ +8% this month</div></div>
+        <div class="stat glass"><div class="stathead"><span>Total Patients</span><span class="icon">👥</span></div><div class="number">1,248</div><div class="growth">↗ +12% this month</div></div>
+        <div class="stat glass"><div class="stathead"><span>Today's Appointments</span><span class="icon">📅</span></div><div class="number" id="count">18</div><div class="growth">6 upcoming</div></div>
+      </div>
+      <div class="content">
+        <div class="panel glass"><div class="panelhead"><h3>Today's Appointments</h3><button class="link" onclick="go('Appointments')">View all →</button></div><div id="dashRows"></div></div>
+        <div class="panel glass"><div class="panelhead"><h3>Quick Actions</h3></div><div class="actions">
+          <button class="action" onclick="go('Doctors')">🩺　<strong>Add Doctor</strong><br><small class="muted">Manage your medical team</small></button>
+          <button class="action" onclick="go('Patients')">👥　<strong>Register Patient</strong><br><small class="muted">Add a patient record</small></button>
+          <button class="action" onclick="openBooking()">📅　<strong>Book Appointment</strong><br><small class="muted">Schedule a clinic visit</small></button>
+        </div></div>
+      </div>
+    </section>
+
+    <section class="page" id="Doctors"><div class="panel glass"><div class="panelhead"><div><h2>Doctors</h2><p class="sub">Manage your clinic's medical professionals.</p></div><button class="btn" onclick="toast('Doctor form is ready to connect to your backend')">＋ Add Doctor</button></div><div class="row"><strong>Doctor</strong><strong>Specialization</strong><strong>Status</strong><strong>Actions</strong></div>
+      <div class="row"><span class="person"><span class="mini">👩‍⚕️</span>Dr. Sarah Wilson</span><span>Cardiology</span><span class="status">Available</span><button class="link" onclick="toast('Doctor details')">View · Edit</button></div>
+      <div class="row"><span class="person"><span class="mini">👨‍⚕️</span>Dr. James Chen</span><span>Dermatology</span><span class="status">Available</span><button class="link" onclick="toast('Doctor details')">View · Edit</button></div>
+      <div class="row"><span class="person"><span class="mini">👩‍⚕️</span>Dr. Maya Patel</span><span>Family Medicine</span><span class="status Pending">In consultation</span><button class="link" onclick="toast('Doctor details')">View · Edit</button></div>
+    </div></section>
+
+    <section class="page" id="Patients"><div class="panel glass"><div class="panelhead"><div><h2>Patients</h2><p class="sub">Manage patient information and records.</p></div><button class="btn" onclick="toast('Patient registration is ready to connect to your backend')">＋ Register Patient</button></div><div class="row"><strong>Patient</strong><strong>Age / Gender</strong><strong>Phone</strong><strong>Actions</strong></div>
+      <div class="row"><span class="person"><span class="mini">👤</span>John Doe</span><span>34 · Male</span><span>+1 555 0101</span><button class="link" onclick="toast('Patient details')">View · Edit</button></div>
+      <div class="row"><span class="person"><span class="mini">👤</span>Emily Carter</span><span>28 · Female</span><span>+1 555 0102</span><button class="link" onclick="toast('Patient details')">View · Edit</button></div>
+      <div class="row"><span class="person"><span class="mini">👤</span>Michael Brown</span><span>52 · Male</span><span>+1 555 0103</span><button class="link" onclick="toast('Patient details')">View · Edit</button></div>
+    </div></section>
+
+    <section class="page" id="Appointments"><div class="panel glass"><div class="panelhead"><div><h2>Appointments</h2><p class="sub">Schedule and manage clinic appointments.</p></div><button class="btn" onclick="openBooking()">＋ Book Appointment</button></div>
+      <div class="toolbar"><input id="filter" placeholder="Search patient or doctor"><select id="statusFilter"><option value="">All statuses</option><option>Confirmed</option><option>Pending</option><option>Completed</option><option>Cancelled</option></select></div>
+      <div class="table"><div class="row"><strong>Patient</strong><strong>Doctor</strong><strong>Date</strong><strong>Time</strong><strong>Status</strong></div><div id="allRows"></div></div>
+    </div></section>
+  </main>
+</div>
+<dialog id="booking">
+  <h2>Book Appointment</h2><p class="sub">Enter the appointment details below.</p>
+  <form id="bookForm" class="form">
+    <input name="patient" placeholder="Patient name" required>
+    <select name="doctor"><option>Dr. Sarah Wilson</option><option>Dr. James Chen</option><option>Dr. Maya Patel</option></select>
+    <input name="date" type="date" required>
+    <input name="time" type="time" required>
+    <select name="status"><option>Confirmed</option><option>Pending</option></select>
+    <div class="modal-actions"><button type="button" class="secondary" onclick="booking.close()">Cancel</button><button class="btn">Book Appointment</button></div>
+  </form>
+</dialog>
+<div id="toast">✓ Appointment booked successfully</div>
+<script>
+const initial=[
+  {patient:"John Doe",doctor:"Dr. Sarah Wilson",date:"03 Oct 2026",time:"10:30 AM",status:"Confirmed"},
+  {patient:"Emily Carter",doctor:"Dr. James Chen",date:"03 Oct 2026",time:"11:00 AM",status:"Pending"},
+  {patient:"Michael Brown",doctor:"Dr. Maya Patel",date:"03 Oct 2026",time:"11:30 AM",status:"Completed"},
+  {patient:"Olivia Martin",doctor:"Dr. Sarah Wilson",date:"03 Oct 2026",time:"01:00 PM",status:"Confirmed"}
+];
+let appointments=JSON.parse(localStorage.getItem("mediCareAppointments")||"null")||initial;
+function render(){
+ const row=a=>`<div class="row" data-search="${(a.patient+' '+a.doctor+' '+a.status).toLowerCase()}"><span class="person"><span class="mini">👤</span>${a.patient}</span><span>${a.doctor}</span><span class="date">${a.date}</span><span>${a.time}</span><span class="status ${a.status}">${a.status}</span></div>`;
+ document.querySelector("#dashRows").innerHTML=appointments.slice(0,4).map(row).join("")||'<div class="empty">No appointments found</div>';
+ document.querySelector("#allRows").innerHTML=appointments.map(row).join("")||'<div class="empty">No appointments found</div>';
+ document.querySelector("#count").textContent=18+appointments.length-initial.length;
+}
+function go(page){document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===page));document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page));document.querySelector("#greeting").textContent=page==="Dashboard"?"Good morning, Admin 👋":page;}
+document.querySelectorAll("nav button[data-page]").forEach(b=>b.onclick=()=>go(b.dataset.page));
+function openBooking(){document.querySelector("#booking").showModal()}
+function toast(text){const t=document.querySelector("#toast");t.textContent="✓ "+text;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2600)}
+document.querySelector("#bookForm").onsubmit=e=>{e.preventDefault();const d=Object.fromEntries(new FormData(e.target));const date=new Date(d.date+"T12:00:00");appointments.unshift({patient:d.patient,doctor:d.doctor,date:date.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}),time:new Date("2000-01-01T"+d.time).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}),status:d.status});localStorage.setItem("mediCareAppointments",JSON.stringify(appointments));render();e.target.reset();booking.close();toast("Appointment booked successfully")};
+function applySearch(){const q=(document.querySelector("#filter").value+" "+document.querySelector("#search").value).toLowerCase();const status=document.querySelector("#statusFilter").value;document.querySelectorAll("#allRows .row[data-search]").forEach(r=>r.style.display=(r.dataset.search.includes(q.trim())&&(!status||r.dataset.search.includes(status.toLowerCase())))?"grid":"none")}
+document.querySelector("#filter").oninput=applySearch;document.querySelector("#search").oninput=applySearch;document.querySelector("#statusFilter").onchange=applySearch;
+render();
+</script>
+</body>
+</html>
+```
+
+This is a **front-end demo**: appointments you add are saved in the browser using local storage. Doctor and patient forms, authentication, and a database are not connected.
